@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Am — Admin Control Panel</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F211D; --panel:#17332C; --panel-line:#2C4A41; --ink:#EAF2EE; --ink-soft:#9FB9B0;
+    --mustard:#FF6F4B; --mustard-deep:#E14F2E; --teal:#3FA089; --danger:#FF6E6E;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--bg); color:var(--ink); font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.5;}
+  .wrap{max-width:680px; margin:0 auto; padding:28px 20px 70px;}
+  h1{font-family:'Sora',sans-serif; font-size:22px; font-weight:800; margin:0 0 4px;}
+  .sub{font-size:13px; color:var(--ink-soft); margin-bottom:26px;}
+  label{font-size:12.5px; font-weight:700; color:var(--ink-soft); display:block; margin-bottom:5px;}
+  input[type=text]{width:100%; padding:11px 13px; border:1px solid var(--panel-line); border-radius:8px; font-size:14.5px; background:#0F211D; color:var(--ink);}
+  textarea{width:100%; padding:11px 13px; border:1px solid var(--panel-line); border-radius:8px; font-size:14px; font-family:inherit; min-height:80px; resize:vertical; background:#0F211D; color:var(--ink);}
+  button.primary{background:var(--mustard); color:#151515; border:none; padding:11px 20px; border-radius:8px; font-weight:800; font-size:14.5px; cursor:pointer;}
+  button.primary:hover{background:var(--mustard-deep); color:#fff;}
+  .error{color:var(--danger); font-size:13.5px; margin-top:10px; display:none;}
+  .error.show{display:block;}
+  .note{font-size:12.5px; color:var(--ink-soft); margin-top:14px;}
+  .lock{max-width:340px; margin:60px auto; text-align:center;}
+  .lock input{margin-bottom:12px;}
+  .card{background:var(--panel); border:1px solid var(--panel-line); border-radius:14px; padding:20px; margin-bottom:20px;}
+  .stat-row{display:flex; gap:16px; flex-wrap:wrap;}
+  .stat b{font-family:'Sora',sans-serif; display:block; font-size:30px; font-weight:800; color:var(--mustard);}
+  .stat span{font-size:12.5px; color:var(--ink-soft);}
+  .kb-item{background:var(--bg); border:1px solid var(--panel-line); border-radius:10px; padding:14px; margin-bottom:10px;}
+  .kb-item .kw{font-size:12px; font-weight:700; color:var(--mustard); margin-bottom:4px;}
+  .kb-item .ans{font-size:13.5px; margin-bottom:8px; white-space:pre-wrap;}
+  .kb-item .del{background:none; border:none; color:var(--danger); font-size:12px; cursor:pointer; font-weight:700; padding:0;}
+  .kb-empty{font-size:13px; color:var(--ink-soft); text-align:center; padding:16px;}
+  .section-title{font-family:'Sora',sans-serif; font-size:16px; font-weight:800; margin:0 0 14px;}
+  ul.guide{padding-left:18px; font-size:13.5px; margin:10px 0;}
+  ul.guide li{margin-bottom:6px;}
+  code{background:var(--bg); border:1px solid var(--panel-line); padding:1px 5px; border-radius:4px; font-size:12.5px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="lock" id="lock">
+    <h1>Am Admin</h1>
+    <p class="sub">Ye page public website se link nahi hai — sirf aapke paas iska link hona chahiye.</p>
+    <label for="pass">Password</label>
+    <input type="text" id="pass" placeholder="Password daalein" onkeydown="if(event.key==='Enter')unlock();">
+    <button class="primary" onclick="unlock()">Login</button>
+    <div class="error" id="lockError"></div>
+    <p class="note">Default password: <code>admin123</code> — isse is file ke JS section mein badal dein. Yeh sirf browser-side check hai, kisi tekhniki visitor ko file se nikala ja sakta hai — sach mein secure banane ke liye server-side login (backend) chahiye hoga.</p>
+  </div>
+
+  <div id="panel" style="display:none;">
+    <h1>Am Admin</h1>
+    <p class="sub">Website ki jankari, visitors aur ads yahan se manage karein.</p>
+
+    <div class="card">
+      <div class="section-title">Visitors</div>
+      <div class="stat-row">
+        <div class="stat"><b id="visitCount">—</b><span>Total Page Visits (public site load hone par count hota hai)</span></div>
+      </div>
+      <p class="note">Ye counter <code>countapi.mileshilliard.com</code> naam ki free service se aata hai — ye sabhi visitors ka real count hai, sirf aapke device ka nahi. Lekin ye ek chhota free service hai, hamesha ke liye guarantee nahi hai. Lambe samay ke liye reliable tracking chahiye to website mein <b>Google Analytics</b> laga dein (free, Google ka apna tool) — bataiye to main uska code bhi jod dunga.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Ads Kaise Lagayein</div>
+      <ul class="guide">
+        <li>Sabse pehle <b>Google AdSense</b> (ya koi aur ad network) par account banayein aur apni website submit karein — approval milne mein kuch din lagte hain.</li>
+        <li>Approval ke baad AdSense aapko ek chhota sa script code dega — wo public site ki <code>&lt;head&gt;</code> section mein daal dein. Isse "Auto Ads" chalu ho jaata hai, jo khud-ba-khud sahi jagah par ads dikhata hai.</li>
+        <li>Public site mein jo <code>#interstitial</code> overlay hai (jo tool kholte hi automatically dikhta hai) — usmein apna AdSense "Interstitial" ya "Anchor" ad unit ka code daal sakte hain, taaki har click par real ad chale.</li>
+        <li>Jitne bhi "Advertisement" wale dashed box hain website mein, wahan bhi AdSense ka display ad unit code daal dein.</li>
+      </ul>
+      <p class="note">Main AdSense account khud nahi bana sakta (ye Google ki approval process hai), lekin jaise hi aapke paas ad code ho, main use website mein sahi jagah fit kar sakta hoon.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Telegram Link</div>
+      <label for="telegramInput">Aapka Telegram Channel/ID Link</label>
+      <input type="text" id="telegramInput" placeholder="https://t.me/aapkaUsername">
+      <button class="primary" style="margin-top:12px;" onclick="saveTelegram()">Save Karein</button>
+      <p class="note">Ye link public site ke top par ek button ki tarah dikhega. Khali rakhne par button nahi dikhega.</p>
+    </div>
+
+    <div class="card">
+      <div class="section-title">App Promotion Links</div>
+      <label for="promoLabel">App ka Naam</label>
+      <input type="text" id="promoLabel" placeholder="Jaise: XYZ App">
+      <label for="promoUrl" style="margin-top:12px;">Invite / Download Link</label>
+      <input type="text" id="promoUrl" placeholder="https://...">
+      <button class="primary" style="margin-top:12px;" onclick="addPromo()">Add Karein</button>
+      <p class="note">Ye links public site ke home screen par ek "Promoted" section mein dikhenge. Jitne chahein utne add/remove kar sakte hain, jab chahein.</p>
+    </div>
+    <div id="promoList"></div>
+
+  </div>
+</div>
+
+<script>
+const ADMIN_PASSWORD = "admin123";
+const COUNTER_KEY = 'am-ai-yoursite-2026'; // must match the key in the public site file
+const TELEGRAM_KEY = 'amai_telegram_v1';
+const PROMO_KEY = 'amai_promo_v1';
+
+function unlock(){
+  const pass = document.getElementById('pass').value;
+  const err = document.getElementById('lockError');
+  if(pass === ADMIN_PASSWORD){
+    document.getElementById('lock').style.display = 'none';
+    document.getElementById('panel').style.display = 'block';
+    loadVisitCount();
+    loadTelegram();
+    refreshPromo();
+  } else {
+    err.textContent = 'Galat password.';
+    err.classList.add('show');
+  }
+}
+
+async function loadVisitCount(){
+  const el = document.getElementById('visitCount');
+  try{
+    const res = await fetch(`https://countapi.mileshilliard.com/api/v1/get/${COUNTER_KEY}`);
+    const data = await res.json();
+    el.textContent = data.value ?? '0';
+  }catch(e){
+    el.textContent = 'N/A';
+  }
+}
+
+/* ---------- TELEGRAM LINK ---------- */
+function loadTelegram(){
+  document.getElementById('telegramInput').value = localStorage.getItem(TELEGRAM_KEY) || '';
+}
+function saveTelegram(){
+  const val = document.getElementById('telegramInput').value.trim();
+  localStorage.setItem(TELEGRAM_KEY, val);
+  alert('Telegram link save ho gaya.');
+}
+
+/* ---------- APP PROMOTION LINKS ---------- */
+function getPromo(){
+  try{ return JSON.parse(localStorage.getItem(PROMO_KEY)) || []; }
+  catch(e){ return []; }
+}
+function savePromo(list){ localStorage.setItem(PROMO_KEY, JSON.stringify(list)); }
+
+function addPromo(){
+  const label = document.getElementById('promoLabel').value.trim();
+  const url = document.getElementById('promoUrl').value.trim();
+  if(!label || !url) return;
+  const list = getPromo();
+  list.push({label, url});
+  savePromo(list);
+  document.getElementById('promoLabel').value = '';
+  document.getElementById('promoUrl').value = '';
+  refreshPromo();
+}
+function deletePromo(idx){
+  const list = getPromo();
+  list.splice(idx,1);
+  savePromo(list);
+  refreshPromo();
+}
+function refreshPromo(){
+  const listEl = document.getElementById('promoList');
+  const list = getPromo();
+  if(list.length === 0){
+    listEl.innerHTML = '<div class="kb-empty">Abhi koi promotion link add nahi hua hai.</div>';
+    return;
+  }
+  listEl.innerHTML = list.map((item, idx) => `
+    <div class="kb-item">
+      <div class="kw">${escapeHtml(item.label)}</div>
+      <div class="ans">${escapeHtml(item.url)}</div>
+      <button class="del" onclick="deletePromo(${idx})">Hatayein</button>
+    </div>`).join('');
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
